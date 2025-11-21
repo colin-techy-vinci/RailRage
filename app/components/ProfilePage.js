@@ -15,9 +15,8 @@ import {
   Trash2,
   Lock,
 } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient"; // Pour le fond stylé
+import { LinearGradient } from "expo-linear-gradient";
 
-// --- THEME ---
 const COLORS = {
   bg: "#0A0A0A",
   card: "#1C1C1E",
@@ -29,8 +28,16 @@ const COLORS = {
   white: "#FFFFFF",
 };
 
-export function ProfilePage({ balance }) {
-  // --- DATA ---
+// 👇 AJOUTE 'inventory' et 'onBuySkin' dans les props
+export function ProfilePage({
+  balance,
+  pseudo,
+  inventory,
+  onBuySkin,
+  onReset,
+  currentAvatar,
+  onEquipSkin,
+}) {
   const stats = [
     { label: "RageCoins", value: balance, icon: "🪙" },
     { label: "Trains Annulés", value: "12", icon: "☠️" },
@@ -38,14 +45,8 @@ export function ProfilePage({ balance }) {
     { label: "Taux de Victoire", value: "65%", icon: "📈" },
   ];
 
-  const inventory = [
-    { name: "Zombie", emoji: "🧟", unlocked: true },
-    { name: "Conducteur", emoji: "👨‍✈️", unlocked: true },
-    { name: "Pigeon", emoji: "🕊️", unlocked: true },
-    { name: "Robot", emoji: "🤖", unlocked: false },
-    { name: "Ninja", emoji: "🥷", unlocked: false },
-    { name: "Alien", emoji: "👽", unlocked: false },
-  ];
+  // ❌ J'ai supprimé la variable 'inventory' locale ici.
+  // On utilise celle reçue en props.
 
   const badges = [
     {
@@ -76,39 +77,25 @@ export function ProfilePage({ balance }) {
       color: "#8B0000",
       unlocked: false,
     },
-    {
-      name: "Le Marathonien",
-      description: "Accumulé 100h de retard",
-      icon: "⏱️",
-      color: "#FFD700",
-      unlocked: false,
-    },
-    {
-      name: "Le Chanceux",
-      description: "Gagné 1000 RageCoins",
-      icon: "🍀",
-      color: "#32ADE6",
-      unlocked: false,
-    },
   ];
 
   const settings = [
     { icon: Bell, label: "Notifications" },
     { icon: UserPlus, label: "Inviter un pote de galère" },
     { icon: HelpCircle, label: "Support" },
-    { icon: Trash2, label: "Supprimer mon compte", danger: true },
+    { icon: Trash2, label: "Reset Save (Dev)", action: "reset", danger: true },
   ];
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 120 }} // Espace pour la nav bar
+      contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* --- HEADER: CARTE D'IDENTITÉ --- */}
+      {/* HEADER: CARTE D'IDENTITÉ */}
       <View style={styles.headerContainer}>
         <LinearGradient
-          colors={["#0A0A0A", "#2D1B4E", "#0A0A0A"]} // Dégradé violet sombre
+          colors={["#0A0A0A", "#2D1B4E", "#0A0A0A"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.identityCard}
@@ -116,16 +103,16 @@ export function ProfilePage({ balance }) {
           <View style={styles.avatarSection}>
             <View style={styles.avatarGlowContainer}>
               <Image
-                source={{ uri: "https://i.pravatar.cc/150?img=11" }}
+                source={{ uri: currentAvatar }}
                 style={styles.avatarImage}
               />
-              {/* Badge Pigeon */}
               <View style={styles.pigeonBadge}>
                 <Text style={{ fontSize: 12 }}>🕊️</Text>
               </View>
             </View>
 
-            <Text style={styles.pseudo}>PigeonVoyageur</Text>
+            {/* On affiche le vrai pseudo */}
+            <Text style={styles.pseudo}>{pseudo || "PigeonVoyageur"}</Text>
 
             <View style={styles.titleBadge}>
               <Text style={styles.titleText}>Navetteur Masochiste</Text>
@@ -134,7 +121,7 @@ export function ProfilePage({ balance }) {
         </LinearGradient>
       </View>
 
-      {/* --- STATS GRID --- */}
+      {/* STATS GRID */}
       <View style={styles.section}>
         <View style={styles.statsGrid}>
           {stats.map((stat, index) => (
@@ -147,32 +134,57 @@ export function ProfilePage({ balance }) {
         </View>
       </View>
 
-      {/* --- SKINS (Horizontal Scroll) --- */}
+      {/* --- SHOP SKINS (Interactif) --- */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Skins & Cosmétiques</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}
-        >
-          {inventory.map((item, index) => (
-            <View
-              key={index}
-              style={[styles.skinCard, !item.unlocked && { opacity: 0.4 }]}
-            >
-              <Text style={styles.skinEmoji}>{item.emoji}</Text>
-              {!item.unlocked && (
-                <View style={styles.lockIcon}>
-                  <Lock size={12} color="white" />
-                </View>
-              )}
-              <Text style={styles.skinName}>{item.name}</Text>
-            </View>
-          ))}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
+          
+          {/* On utilise l'inventaire qui vient de App.js */}
+          {inventory && inventory.map((item, index) => {
+            
+            // 👇 DÉFINITION DE LA VARIABLE ICI (Dans la boucle)
+            const isEquipped = currentAvatar === item.image;
+
+            return (
+              <TouchableOpacity 
+                key={index} 
+                // LOGIQUE DU CLIC : Si débloqué -> Équiper, Sinon -> Acheter
+                onPress={() => item.unlocked ? onEquipSkin(item) : onBuySkin(item)}
+                activeOpacity={item.unlocked ? 0.7 : 0.9}
+                style={[
+                  styles.skinCard, 
+                  !item.unlocked && { opacity: 0.6, borderColor: '#444' },
+                  // BORDURE VERTE SI ÉQUIPÉ
+                  isEquipped && { borderColor: COLORS.neonGreen, borderWidth: 2, backgroundColor: 'rgba(57, 255, 20, 0.1)' }
+                ]}
+              >
+                <Text style={styles.skinEmoji}>{item.emoji}</Text>
+                
+                {/* LOGIQUE D'AFFICHAGE */}
+                {isEquipped ? (
+                  // Badge ACTIF
+                  <View style={styles.equippedBadge}>
+                    <Text style={{color: 'black', fontSize: 8, fontWeight: 'bold'}}>ACTIF</Text>
+                  </View>
+                ) : !item.unlocked ? (
+                  // Prix + Cadenas
+                  <View style={styles.priceTag}>
+                    <Lock size={10} color="#FF3B30" style={{marginRight: 4}}/>
+                    <Text style={styles.priceText}>{item.price}</Text>
+                  </View>
+                ) : (
+                  // Point vert (Possédé mais pas équipé)
+                  <View style={styles.ownedDot} />
+                )}
+                
+                <Text style={styles.skinName}>{item.name}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
 
-      {/* --- BADGES / TROPHÉES (Grid 3 cols) --- */}
+      {/* BADGES */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { marginLeft: 16 }]}>
           Salle des Trophées
@@ -189,19 +201,12 @@ export function ProfilePage({ balance }) {
                   {
                     backgroundColor: badge.unlocked
                       ? `${badge.color}20`
-                      : COLORS.card, // 20 = transparence hex
+                      : COLORS.card,
                     borderColor: badge.unlocked ? badge.color : COLORS.border,
                   },
                 ]}
               >
                 <Text style={{ fontSize: 24 }}>{badge.icon}</Text>
-                {!badge.unlocked && (
-                  <Lock
-                    size={12}
-                    color="white"
-                    style={{ position: "absolute", top: 4, right: 4 }}
-                  />
-                )}
               </View>
               <Text style={styles.badgeName} numberOfLines={1}>
                 {badge.name}
@@ -211,7 +216,7 @@ export function ProfilePage({ balance }) {
         </View>
       </View>
 
-      {/* --- PARAMÈTRES --- */}
+      {/* SETTINGS */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { marginLeft: 16 }]}>
           Paramètres
@@ -224,6 +229,11 @@ export function ProfilePage({ balance }) {
                 styles.settingRow,
                 setting.danger && { borderColor: "rgba(255,59,48,0.3)" },
               ]}
+              onPress={() => {
+                if (setting.action === "reset" && onReset) {
+                  onReset();
+                }
+              }}
             >
               <setting.icon
                 size={20}
@@ -232,7 +242,7 @@ export function ProfilePage({ balance }) {
               <Text
                 style={[
                   styles.settingText,
-                  setting.danger && { color: COLORS.neonRed },
+                  setting.danger && { color: COLORS.neonRed }, // Le rouge écrase le blanc si danger
                 ]}
               >
                 {setting.label}
@@ -253,40 +263,33 @@ export function ProfilePage({ balance }) {
 
 // --- STYLES ---
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  section: {
-    marginBottom: 24,
-  },
+  container: { flex: 1, backgroundColor: COLORS.bg },
+  section: { marginBottom: 24 },
   sectionTitle: {
     color: COLORS.white,
     fontWeight: "bold",
     fontSize: 16,
     marginBottom: 12,
-  },
+    marginLeft: 16,
+  }, // Ajout marginLeft ici pour aligner
 
-  // Header Identity Card
-  headerContainer: {
-    padding: 16,
-    marginTop: 10,
-  },
+  // Header Identity Card (Styles existants...)
+  headerContainer: { padding: 16, marginTop: 10 },
   identityCard: {
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(191, 90, 242, 0.3)", // Violet border
+    borderColor: "rgba(191, 90, 242, 0.3)",
   },
-  avatarSection: {
-    alignItems: "center",
-  },
-  avatarWrapper: {
-    marginBottom: 16,
-    position: 'relative',
-    // 👇 AJOUTE ÇA POUR CENTRER LE GLOW
-    alignItems: 'center', 
-    justifyContent: 'center',
+  avatarSection: { alignItems: "center" },
+  avatarGlowContainer: {
+    shadowColor: COLORS.neonGreen,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    elevation: 10,
+    backgroundColor: "#0000",
+    borderRadius: 50,
   },
   avatarImage: {
     width: 100,
@@ -297,7 +300,7 @@ const styles = StyleSheet.create({
   },
   pigeonBadge: {
     position: "absolute",
-    bottom: -3,
+    bottom: -6,
     alignSelf: "center",
     backgroundColor: COLORS.neonGreen,
     paddingHorizontal: 8,
@@ -307,24 +310,19 @@ const styles = StyleSheet.create({
   pseudo: {
     color: COLORS.white,
     fontSize: 24,
-    bottom: -9,
     fontWeight: "bold",
     marginBottom: 8,
+    marginTop: 16,
   },
   titleBadge: {
     backgroundColor: "rgba(191, 90, 242, 0.1)",
     borderColor: COLORS.purple,
     borderWidth: 1,
-    bottom: -9,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
   },
-  titleText: {
-    color: COLORS.purple,
-    fontSize: 12,
-    fontWeight: "600",
-  },
+  titleText: { color: COLORS.purple, fontSize: 12, fontWeight: "600" },
 
   // Stats Grid
   statsGrid: {
@@ -334,7 +332,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   statCard: {
-    width: "48%", // Pour avoir 2 colonnes
+    width: "48%",
     backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 16,
@@ -350,20 +348,47 @@ const styles = StyleSheet.create({
   },
   statLabel: { color: COLORS.textDim, fontSize: 12 },
 
-  // Skins
+  // Skins (Nouveaux Styles Shop)
   skinCard: {
-    width: 90,
-    height: 100,
+    width: 100,
+    height: 110,
     backgroundColor: COLORS.card,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
-  skinEmoji: { fontSize: 32, marginBottom: 8 },
-  skinName: { color: COLORS.textDim, fontSize: 10 },
-  lockIcon: { position: "absolute", bottom: 4, right: 4 },
+  skinEmoji: { fontSize: 32, marginBottom: 14 },
+  skinName: {
+    color: COLORS.textDim,
+    fontSize: 10,
+    position: "absolute",
+    bottom: 10,
+  },
+
+  priceTag: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  priceText: { color: "#FF3B30", fontSize: 10, fontWeight: "bold" },
+  ownedDot: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.neonGreen,
+  },
 
   // Badges Grid
   badgeGrid: {
@@ -372,31 +397,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 12,
   },
-  badgeCard: {
-    width: "30.5%", // Pour 3 colonnes environ
-    alignItems: "center",
-    marginBottom: 8,
-  },
+  badgeCard: { width: "30.5%", alignItems: "center", marginBottom: 8 },
   badgeIconBox: {
     width: "100%",
-    aspectRatio: 1, // Carré
+    aspectRatio: 1,
     borderRadius: 16,
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 6,
   },
-  badgeName: {
-    color: COLORS.textDim,
-    fontSize: 10,
-    textAlign: "center",
-  },
+  badgeName: { color: COLORS.textDim, fontSize: 10, textAlign: "center" },
 
   // Settings
-  settingsList: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
+  settingsList: { paddingHorizontal: 16, gap: 8 },
   settingRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -407,24 +421,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     gap: 12,
   },
-  settingText: {
-    color: "#D1D1D6",
-    fontWeight: "500",
+  settingText: { color: "#D1D1D6", fontWeight: "500" },
+  // ...
+  equippedBadge: {
+    position: 'absolute', top: 6, right: 6,
+    backgroundColor: COLORS.neonGreen,
+    paddingHorizontal: 6, paddingVertical: 2,
+    borderRadius: 8,
   },
-
-
-  // 👇 NOUVEAU STYLE POUR LE GLOW SUBTIL
-  avatarGlowContainer: {
-    // Pour iOS :
-    shadowColor: COLORS.purple,
-    shadowOffset: { width: 0, height: 0 }, // Lumière centrée
-    shadowOpacity: 1.6, // Pas trop fort
-    shadowRadius: 15,   // Rayon large pour l'effet "flou"
-    
-    // Pour Android (moins précis pour les couleurs, mais donne du relief) :
-    elevation: 10,
-    backgroundColor: '#0000', // Nécessaire sur Android pour que l'ombre apparaisse parfois
-    borderRadius: 50, // Important pour que l'ombre suive le rond
-  },
-
 });

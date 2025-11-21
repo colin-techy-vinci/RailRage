@@ -171,7 +171,7 @@ const LeaderboardItem = ({ rank, pseudo, gain }) => (
 
 // --- 2. LA PAGE PRINCIPALE (HomePage) ---
 
-export function HomePage({ bets, balance, onSimulate }) {
+export function HomePage({ bets, balance, onSimulate, currentAvatar }) {
   // Données (copiées de ton code React)
   const trains = [
     { time: "18:12", destination: "Mons", status: "onTime", delay: 0 },
@@ -202,14 +202,10 @@ export function HomePage({ bets, balance, onSimulate }) {
           <View>
             <Image
               source={{
-                uri: "https://scontent.fbru5-1.fna.fbcdn.net/v/t39.30808-6/465968573_9119371728081459_2795510261622361528_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=MioVz-HHf-4Q7kNvwF7H6kP&_nc_oc=AdnOoejUlMYitae1RnkqPmUsFL6Crk7csQ3ZUQBBQgHLQ5pzbNMr7Kc0SPfckUXvbmCDtKKW4cxEWdg00G8LZlip&_nc_zt=23&_nc_ht=scontent.fbru5-1.fna&_nc_gid=lddBXSVJjg5FaJUqlW9grA&oh=00_Afj3r2w84vS_gqkPSYGMCNRYgpZTO2zlQp1Nc_QWYx9pDQ&oe=692571DA",
+                uri: currentAvatar,
               }} // Image temporaire
               style={styles.avatarMain}
             />
-            {/* Badge Pigeon */}
-            <View style={styles.badge}>
-              <Text style={{ fontSize: 10 }}>🕊️</Text>
-            </View>
           </View>
         </View>
 
