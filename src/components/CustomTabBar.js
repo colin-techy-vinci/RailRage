@@ -1,12 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Home, Search, Trophy, User } from 'lucide-react-native';
 
-const COLORS = {
-  neonGreen: '#39FF14',
-  textDim: '#6B7280',
-};
+// 👇 ON IMPORTE LE THÈME GLOBAL (Plus de couleurs en dur ici)
+import { COLORS } from '../constants/theme';
 
 export function CustomTabBar({ state, descriptors, navigation }) {
   return (
@@ -46,6 +44,7 @@ export function CustomTabBar({ state, descriptors, navigation }) {
               >
                 <Icon 
                   size={24} 
+                  // Utilisation des couleurs du thème
                   color={isFocused ? COLORS.neonGreen : COLORS.textDim} 
                 />
                 <Text style={[
@@ -66,12 +65,11 @@ export function CustomTabBar({ state, descriptors, navigation }) {
 const styles = StyleSheet.create({
   navContainer: {
     position: 'absolute',
-    bottom: 20, // Flottant
+    bottom: 20,
     left: 20,
     right: 20,
     borderRadius: 20,
     overflow: 'hidden',
-    // Ombre et Bordure
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     shadowColor: "#000",

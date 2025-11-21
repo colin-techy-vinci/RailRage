@@ -1,19 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Image } from 'react-native';
 import { Crown, Users, Globe, Plus, Clock } from 'lucide-react-native';
-
-const COLORS = {
-  bg: '#0A0A0A',
-  card: '#1C1C1E',
-  border: '#2A2A2E',
-  neonGreen: '#39FF14',
-  neonRed: '#FF3B30',
-  textDim: '#8E8E93',
-  white: '#FFFFFF',
-  gold: '#FFD700',
-  silver: '#C0C0C0',
-  bronze: '#CD7F32',
-};
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { COLORS } from '../constants/theme';
 
 // --- COMPOSANT AVATAR AMÉLIORÉ (Gère Texte ET Images) ---
 const Avatar = ({ fallback, size = 40, color, border = false }) => {
@@ -46,6 +35,7 @@ export function LeaderboardPage({ navigation, friends, onAddFriend, myPseudo, my
   const [isModalVisible, setModalVisible] = useState(false);
   const [newFriendName, setNewFriendName] = useState('');
   const [timeLeft, setTimeLeft] = useState("");
+  const insets = useSafeAreaInsets();
 
   // --- LOGIQUE DU TIMER (Dimanche 20h) ---
   useEffect(() => {
@@ -156,7 +146,7 @@ export function LeaderboardPage({ navigation, friends, onAddFriend, myPseudo, my
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer, { paddingTop: insets.top }]}>
       
       <View style={styles.header}>
         <Text style={styles.title}>CLASSEMENT</Text>
