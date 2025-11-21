@@ -14,11 +14,7 @@
 
 | Login (Gateway) | Accueil (Dashboard) | Pari (Terminal) | Profil (User) |
 |:---:|:---:|:---:|:---:|
-<<<<<<< HEAD
-| <img src="./assets/images/IMG_1573.png" width="200" /> | <img src="./assets/images/IMG_1574" width="200" /> | <img src="./assets/images/IMG_1575" width="200" /> | <img src="./assets/images/IMG_1576" width="200" /> |
-=======
 | <img src="./assets/images/IMG_1573.png" width="200" /> | <img src="./assets/images/IMG_1574.png" width="200" /> | <img src="./assets/images/IMG_1575.png" width="200" /> | <img src="./assets/images/IMG_1576.png" width="200" /> |
->>>>>>> e08599600352ea719de4c7ac0ffe846e7892de9a
 
 
 ---
